@@ -4,7 +4,6 @@ import java.util.Scanner;
 
 public class CoordinateChecker {
     private final Scanner scanner = new Scanner(System.in);
-    Field field = new Field();
 
     public String[] scanAndCheckUserInput() {
         String[] userInput;
@@ -33,19 +32,16 @@ public class CoordinateChecker {
         return value.matches("\\d+");
     }
 
-    public Coordinate getCoordinate(String[] userInput) {
+    public Coordinate getCoordinate(String[] userInput,Game game) {
         int x = Integer.parseInt(userInput[1]) - 1;
         int y = Integer.parseInt(userInput[0]) - 1;
-        return new Coordinate(x, y);
-    }
-
-    public char getMark(String[] userInput) {
-
         String mark = userInput[2];
+        char markCoordinate = 0;
         if (mark.equals("free")) {
-            return field.FREE;
-        } else {
-            return field.MINE;
+            markCoordinate = game.FREE;
+        } else if (mark.equals("mine")) {
+            markCoordinate = game.MINE;
         }
+        return new Coordinate(x, y, markCoordinate);
     }
 }
