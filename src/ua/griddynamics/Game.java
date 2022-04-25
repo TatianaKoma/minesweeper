@@ -28,7 +28,7 @@ public class Game {
         do {
             int x = random.nextInt(WIDTH);
             int y = random.nextInt(HEIGHT);
-            if (hiddenField[y][x] != X && x != userX && y != userY) {
+            if (hiddenField[y][x] != X && x != userX || y != userY) {
                 hiddenField[y][x] = X;
                 minesPlaced++;
             }
@@ -36,8 +36,8 @@ public class Game {
     }
 
     public void buildEmptyField() {
-        for (int i = 0; i < visibleField.length; i++) {
-            Arrays.fill(visibleField[i], POINT);
+        for (char[] chars : visibleField) {
+            Arrays.fill(chars, POINT);
         }
     }
 
@@ -48,11 +48,11 @@ public class Game {
         sb.append("-|---------|");
         sb.append(System.lineSeparator());
         int rowCounter = 1;
-        for (int i = 0; i < mineField.length; i++) {
+        for (char[] chars : mineField) {
             sb.append(rowCounter).append("|");
 
-            for (int j = 0; j < mineField[i].length; j++) {
-                sb.append(mineField[i][j]);
+            for (int j = 0; j < chars.length; j++) {
+                sb.append(chars[j]);
             }
             sb.append("|");
             sb.append(System.lineSeparator());
@@ -92,7 +92,6 @@ public class Game {
                 if (hiddenField[i][j] == '0') {
                     hiddenField[i][j] = POINT;
                 }
-
             }
         }
     }
@@ -112,16 +111,18 @@ public class Game {
             visibleField[y][x] = hiddenField[y][x];
             return;
         }
-//        if (visibleField[y][x] == MINE)
-//            return;
 
-      if (hiddenField[y][x] != POINT)
+        if (hiddenField[y][x] != POINT)
             return;
 
         floodFill(x + 1, y, visited);
         floodFill(x - 1, y, visited);
         floodFill(x, y - 1, visited);
         floodFill(x, y + 1, visited);
+        floodFill(x - 1, y - 1, visited);
+        floodFill(x - 1, y + 1, visited);
+        floodFill(x + 1, y - 1, visited);
+        floodFill(x + 1, y + 1, visited);
     }
 
     public void putAnswer(Coordinate coordinate) {
