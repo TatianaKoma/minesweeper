@@ -103,14 +103,8 @@ public class Game {
         if (visited[y][x]) return;
         visited[y][x] = true;
 
-        if (hiddenField[y][x] == X && hiddenField[x][y] != POINT)
+        if (hiddenField[y][x] == X)
             return;
-
-//        if (visibleField[y][x] == MINE)
-//            return;
-
-//        if (hiddenField[y][x] != POINT)
-//            return;
 
         if (hiddenField[y][x] == POINT) {
             visibleField[y][x] = FREE;
@@ -118,6 +112,12 @@ public class Game {
             visibleField[y][x] = hiddenField[y][x];
             return;
         }
+//        if (visibleField[y][x] == MINE)
+//            return;
+
+      if (hiddenField[y][x] != POINT)
+            return;
+
         floodFill(x + 1, y, visited);
         floodFill(x - 1, y, visited);
         floodFill(x, y - 1, visited);
