@@ -4,6 +4,8 @@ import java.util.Scanner;
 
 public class CoordinateChecker {
     private final Scanner scanner = new Scanner(System.in);
+    private final String USER_FREE = "free";
+    private final String USER_MINE = "mine";
 
     public String[] scanAndCheckUserInput() {
         String[] userInput;
@@ -19,7 +21,7 @@ public class CoordinateChecker {
 
     private boolean isMarkValid(String[] userInput) {
         String mark = userInput[2];
-        return mark.equals("free") || mark.equals("mine");
+        return mark.equals(USER_FREE) || mark.equals(USER_MINE);
     }
 
     private boolean isCoordinateValid(String[] userInput) {
@@ -32,7 +34,7 @@ public class CoordinateChecker {
         return value.matches("\\d+");
     }
 
-    public Coordinate getCoordinate(String[] userInput,Game game) {
+    public Coordinate getCoordinate(String[] userInput, Game game) {
         int x = Integer.parseInt(userInput[1]) - 1;
         int y = Integer.parseInt(userInput[0]) - 1;
         String mark = userInput[2];

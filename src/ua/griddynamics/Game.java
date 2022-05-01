@@ -1,6 +1,5 @@
 package ua.griddynamics;
 
-import java.util.Arrays;
 import java.util.Random;
 
 public class Game {
@@ -12,15 +11,20 @@ public class Game {
     public final char MINE = '*';
     public final char POINT = '.';
 
-    private final char[][] hiddenField;
-    private final char[][] visibleField;
+    private final int numberOfMines;
+    private final Cell[][] fields;
 
-    public Game(char[][] hiddenField, char[][] visibleField) {
-        this.hiddenField = hiddenField;
-        this.visibleField = visibleField;
+    public Game(int numberOfMines) {
+        this.fields = new Cell[WIDTH][HEIGHT];
+        for (int i = 0; i < fields.length; i++) {
+            for (int j = 0; j < fields[i].length; j++) {
+                fields[i][j] = new Cell();
+            }
+        }
+        this.numberOfMines = numberOfMines;
     }
 
-    public void placeMines(Coordinate coordinate, int numberOfMines) {
+    public void placeMines(Coordinate coordinate) {
         Random random = new Random();
         int minesPlaced = 0;
         int userX = coordinate.getX();
@@ -28,31 +32,26 @@ public class Game {
         do {
             int x = random.nextInt(WIDTH);
             int y = random.nextInt(HEIGHT);
-            if (hiddenField[y][x] != X && x != userX || y != userY) {
-                hiddenField[y][x] = X;
+            if (!fields[y][x].isMine() && (x != userX || y != userY)) {
+                fields[y][x].mine = true;
                 minesPlaced++;
             }
         } while (minesPlaced < numberOfMines);
+        numberGenerator();
     }
 
-    public void buildEmptyField() {
-        for (char[] chars : visibleField) {
-            Arrays.fill(chars, POINT);
-        }
-    }
-
-    public String getField(char[][] mineField) {
+    public String getField() {
         StringBuilder sb = new StringBuilder();
         sb.append(" |123456789| ");
         sb.append(System.lineSeparator());
         sb.append("-|---------|");
         sb.append(System.lineSeparator());
         int rowCounter = 1;
-        for (char[] chars : mineField) {
+        for (Cell[] field : fields) {
             sb.append(rowCounter).append("|");
 
-            for (int j = 0; j < chars.length; j++) {
-                sb.append(chars[j]);
+            for (int j = 0; j < fields.length; j++) {
+                sb.append(getSymbol(field[j]));
             }
             sb.append("|");
             sb.append(System.lineSeparator());
@@ -62,100 +61,123 @@ public class Game {
         return sb.toString();
     }
 
-    private int countSurround(int i, int j) {
+    private char getSymbol(Cell cell) {
+        if (cell.isChecked()) {
+            if (cell.markedAsMine) {
+                return MINE;
+            }
+            if (cell.markAsFree) {
+                return FREE;
+            }
+            if (cell.isMine()) {
+                return X;
+            }
+            if (!cell.isEmpty() && !cell.isMine()) {
+                return (char) (cell.getNeighborMines() + 48);
+            }
+        }
+        return POINT;
+    }
+
+    private int countSurround(int x, int y) {
         int count = 0;
-        if (i + 1 != HEIGHT && hiddenField[i + 1][j] == X)
-            count++;
-        if (i + 1 != HEIGHT && j + 1 != WIDTH && hiddenField[i + 1][j + 1] == X)
-            count++;
-        if (i - 1 != -1 && j + 1 != WIDTH && hiddenField[i - 1][j + 1] == X)
-            count++;
-        if (i + 1 != HEIGHT && j - 1 != -1 && hiddenField[i + 1][j - 1] == X)
-            count++;
-        if (i - 1 != -1 && j - 1 != -1 && hiddenField[i - 1][j - 1] == X)
-            count++;
-        if (i - 1 != -1 && hiddenField[i - 1][j] == X)
-            count++;
-        if (j + 1 != WIDTH && hiddenField[i][j + 1] == X)
-            count++;
-        if (j - 1 != -1 && hiddenField[i][j - 1] == X)
-            count++;
+        for (int i = x - 1; i <= x + 1; i++) {
+            for (int j = y - 1; j <= y + 1; j++) {
+                if (i >= 0 && i < WIDTH && j >= 0 && j < HEIGHT) {
+                    if (fields[i][j].isMine()) {
+                        count++;
+                    }
+                }
+            }
+        }
         return count;
     }
 
-    public void numberGenerator() {
+    private void numberGenerator() {
         for (int i = 0; i < HEIGHT; i++) {
             for (int j = 0; j < WIDTH; j++) {
-                if (hiddenField[i][j] != X) {
-                    hiddenField[i][j] = (char) (countSurround(i, j) + 48);
-                }
-                if (hiddenField[i][j] == '0') {
-                    hiddenField[i][j] = POINT;
+                if (!fields[i][j].isMine()) {
+                    fields[i][j].setNeighborMines(countSurround(i, j));
                 }
             }
         }
     }
 
     public void floodFill(int x, int y, boolean[][] visited) {
-        if (x < 0 || x >= 9 || y < 0 || y >= 9) return;
-
-        if (visited[y][x]) return;
-        visited[y][x] = true;
-
-        if (hiddenField[y][x] == X)
+        if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) {
             return;
-
-        if (hiddenField[y][x] == POINT) {
-            visibleField[y][x] = FREE;
-        } else {
-            visibleField[y][x] = hiddenField[y][x];
+        }
+        if (visited[y][x]) {
             return;
         }
 
-        if (hiddenField[y][x] != POINT)
-            return;
+        visited[y][x] = true;
 
-        floodFill(x + 1, y, visited);
-        floodFill(x - 1, y, visited);
-        floodFill(x, y - 1, visited);
-        floodFill(x, y + 1, visited);
-        floodFill(x - 1, y - 1, visited);
-        floodFill(x - 1, y + 1, visited);
-        floodFill(x + 1, y - 1, visited);
-        floodFill(x + 1, y + 1, visited);
+        if (fields[y][x].isMine()) {
+            fields[x][y].checked = false;
+            return;
+        }
+        if (fields[y][x].isEmpty()) {
+            fields[y][x].markAsFree = true;
+            fields[y][x].checked = true;
+
+        } else {
+            fields[y][x].checked = true;
+            return;
+        }
+
+        if (!fields[y][x].isEmpty()) {
+            fields[y][x].checked = false;
+            return;
+        }
+
+        for (int i = x - 1; i <= x + 1; i++) {
+            for (int j = y - 1; j <= y + 1; j++) {
+                floodFill(i, j, visited);
+            }
+        }
     }
 
-    public void putAnswer(Coordinate coordinate) {
+    public boolean putAnswer(Coordinate coordinate) {
         int x = coordinate.getX();
         int y = coordinate.getY();
         char mark = coordinate.getMark();
+        if (mark == FREE && fields[y][x].isMine()) {
+            return false;
+        }
 
         if (mark == FREE) {
-            if (hiddenField[y][x] == POINT) {
-                visibleField[y][x] = FREE;
-            } else {
-                visibleField[y][x] = hiddenField[y][x];
+            if (fields[y][x].isEmpty()) {
+                fields[y][x].checked = true;
+                fields[y][x].markAsFree = true;
+            }
+            if (fields[y][x].markedAsMine) {
+                fields[y][x].markedAsMine = false;
+                fields[y][x].checked = true;
             }
             floodFill(x, y, new boolean[HEIGHT][WIDTH]);
         }
         if (mark == MINE) {
-            if (visibleField[y][x] == MINE) {
-                visibleField[y][x] = POINT;
+            if (fields[y][x].markedAsMine) {
+                fields[y][x].markedAsMine = false;
             } else {
-                visibleField[y][x] = MINE;
+                fields[y][x].markedAsMine = true;
+                fields[y][x].checked = true;
             }
         }
+        return true;
     }
 
-    public boolean isFail(Coordinate coordinate) {
-        return coordinate.getMark() == FREE && hiddenField[coordinate.getY()][coordinate.getX()] == X;
-    }
 
     public void showAllMines() {
-        for (int i = 0; i < hiddenField.length; i++) {
-            for (int j = 0; j < hiddenField[i].length; j++) {
-                if (hiddenField[i][j] == X) {
-                    visibleField[i][j] = hiddenField[i][j];
+        for (Cell[] field : fields) {
+            for (Cell cell : field) {
+                if (cell.isMine()) {
+                    cell.checked = true;
+                }
+                if (cell.markedAsMine && cell.isMine()) {
+                    cell.markedAsMine = false;
+                    cell.checked = true;
                 }
             }
         }
@@ -164,16 +186,18 @@ public class Game {
     public boolean isWin(int numberOfMines) {
         int countMines = 0;
         int countPoints = 0;
-        for (int i = 0; i < visibleField.length; i++) {
-            for (int j = 0; j < visibleField[i].length; j++) {
-                if (visibleField[i][j] == MINE && hiddenField[i][j] == X) {
+        for (Cell[] field : fields) {
+            for (Cell cell : field) {
+                if (cell.isMine() && cell.markedAsMine) {
                     countMines++;
-                } else if (visibleField[i][j] == MINE && hiddenField[i][j] != X) {
+                } else if (!cell.isMine() && cell.markedAsMine) {
                     countMines--;
                 }
-                if (visibleField[i][j] == POINT && hiddenField[i][j] == X) {
+                if (cell.isMine() && !cell.isChecked()) {
                     countPoints++;
-                } else if (visibleField[i][j] == POINT && hiddenField[i][j] != X) {
+                } else if (!cell.isMine() && !cell.isChecked()) {
+                    countPoints--;
+                } else if (!cell.isMine() && cell.markedAsMine) {
                     countPoints--;
                 }
             }

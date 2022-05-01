@@ -8,12 +8,8 @@ public class Main {
         System.out.print("How many mines do you want on the field? >");
         int numberOfMines = scanner.nextInt();
 
-        char[][] hiddenField = new char[Game.HEIGHT][Game.WIDTH];
-        char[][] visibleField = new char[Game.HEIGHT][Game.WIDTH];
-        Game game = new Game(hiddenField, visibleField);
-
-        game.buildEmptyField();
-        System.out.println(game.getField(visibleField));
+        Game game = new Game(numberOfMines);
+        System.out.println(game.getField());
         CoordinateChecker coordinateChecker = new CoordinateChecker();
 
         boolean isMinesPlaced = false;
@@ -21,26 +17,24 @@ public class Main {
             String[] userAnswer = coordinateChecker.scanAndCheckUserInput();
             Coordinate coordinate = coordinateChecker.getCoordinate(userAnswer, game);
             if (!isMinesPlaced) {
-                game.placeMines(coordinate, numberOfMines);
-                game.numberGenerator();
-                System.out.println(game.getField(hiddenField));
-                System.out.println("------");
+                game.placeMines(coordinate);
             }
             isMinesPlaced = true;
             game.putAnswer(coordinate);
-
-            if (game.isFail(coordinate)) {
+            if (!game.putAnswer(coordinate)) {
                 game.showAllMines();
-                System.out.println(game.getField(visibleField));
+                System.out.println(game.getField());
                 System.out.println("You stepped on a mine and failed!");
                 break;
+            }else {
+                game.putAnswer(coordinate);
             }
             if (game.isWin(numberOfMines)) {
-                System.out.println(game.getField(visibleField));
+                System.out.println(game.getField());
                 System.out.println("Congratulations! You found all mines!");
                 break;
             }
-            System.out.println(game.getField(visibleField));
+            System.out.println(game.getField());
         }
     }
 }
