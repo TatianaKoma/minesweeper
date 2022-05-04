@@ -10,6 +10,7 @@ public class Game {
     public final char FREE = '/';
     public final char MINE = '*';
     public final char POINT = '.';
+    public final char ZERO = '0';
 
     private final int numberOfMines;
     private final Cell[][] fields;
@@ -33,7 +34,7 @@ public class Game {
             int x = random.nextInt(WIDTH);
             int y = random.nextInt(HEIGHT);
             if (!fields[y][x].isMine() && (x != userX || y != userY)) {
-                fields[y][x].mine = true;
+                fields[y][x].setMine(true);
                 minesPlaced++;
             }
         } while (minesPlaced < numberOfMines);
@@ -63,17 +64,17 @@ public class Game {
 
     private char getSymbol(Cell cell) {
         if (cell.isChecked()) {
-            if (cell.markedAsMine) {
+            if (cell.isMarkedAsMine()) {
                 return MINE;
             }
-            if (cell.markAsFree) {
+            if (cell.isEmpty()) {
                 return FREE;
             }
             if (cell.isMine()) {
                 return X;
             }
             if (!cell.isEmpty() && !cell.isMine()) {
-                return (char) (cell.getNeighborMines() + 48);
+                return (char) (cell.getNeighborMines() + ZERO);
             }
         }
         return POINT;
@@ -114,20 +115,20 @@ public class Game {
         visited[y][x] = true;
 
         if (fields[y][x].isMine()) {
-            fields[x][y].checked = false;
+            fields[x][y].setChecked(false);
             return;
         }
         if (fields[y][x].isEmpty()) {
-            fields[y][x].markAsFree = true;
-            fields[y][x].checked = true;
+            fields[y][x].isEmpty();
+            fields[y][x].setChecked(true);
 
         } else {
-            fields[y][x].checked = true;
+            fields[y][x].setChecked(true);
             return;
         }
 
         if (!fields[y][x].isEmpty()) {
-            fields[y][x].checked = false;
+            fields[y][x].setChecked(false);
             return;
         }
 
@@ -148,36 +149,35 @@ public class Game {
 
         if (mark == FREE) {
             if (fields[y][x].isEmpty()) {
-                fields[y][x].checked = true;
-                fields[y][x].markAsFree = true;
+                fields[y][x].setChecked(true);
+                fields[y][x].isEmpty();
             }
-            if (fields[y][x].markedAsMine) {
-                fields[y][x].markedAsMine = false;
-                fields[y][x].checked = true;
+            if (fields[y][x].isMarkedAsMine()) {
+                fields[y][x].setMarkedAsMine(false);
+                fields[y][x].setChecked(true);
             }
             floodFill(x, y, new boolean[HEIGHT][WIDTH]);
         }
         if (mark == MINE) {
-            if (fields[y][x].markedAsMine) {
-                fields[y][x].markedAsMine = false;
+            if (fields[y][x].isMarkedAsMine()) {
+                fields[y][x].setMarkedAsMine(false);
             } else {
-                fields[y][x].markedAsMine = true;
-                fields[y][x].checked = true;
+                fields[y][x].setMarkedAsMine(true);
+                fields[y][x].setChecked(true);
             }
         }
         return true;
     }
 
-
     public void showAllMines() {
         for (Cell[] field : fields) {
             for (Cell cell : field) {
                 if (cell.isMine()) {
-                    cell.checked = true;
+                    cell.setChecked(true);
                 }
-                if (cell.markedAsMine && cell.isMine()) {
-                    cell.markedAsMine = false;
-                    cell.checked = true;
+                if (cell.isMarkedAsMine() && cell.isMine()) {
+                    cell.setMarkedAsMine(false);
+                    cell.setChecked(true);
                 }
             }
         }
@@ -188,16 +188,16 @@ public class Game {
         int countPoints = 0;
         for (Cell[] field : fields) {
             for (Cell cell : field) {
-                if (cell.isMine() && cell.markedAsMine) {
+                if (cell.isMine() && cell.isMarkedAsMine()) {
                     countMines++;
-                } else if (!cell.isMine() && cell.markedAsMine) {
+                } else if (!cell.isMine() && cell.isMarkedAsMine()) {
                     countMines--;
                 }
                 if (cell.isMine() && !cell.isChecked()) {
                     countPoints++;
                 } else if (!cell.isMine() && !cell.isChecked()) {
                     countPoints--;
-                } else if (!cell.isMine() && cell.markedAsMine) {
+                } else if (!cell.isMine() && cell.isMarkedAsMine()) {
                     countPoints--;
                 }
             }

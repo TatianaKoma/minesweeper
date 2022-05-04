@@ -4,8 +4,8 @@ import java.util.Scanner;
 
 public class CoordinateChecker {
     private final Scanner scanner = new Scanner(System.in);
-    private final String USER_FREE = "free";
-    private final String USER_MINE = "mine";
+    private static final String USER_FREE = "free";
+    private static final String USER_MINE = "mine";
 
     public String[] scanAndCheckUserInput() {
         String[] userInput;

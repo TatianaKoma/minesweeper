@@ -26,7 +26,7 @@ public class Main {
                 System.out.println(game.getField());
                 System.out.println("You stepped on a mine and failed!");
                 break;
-            }else {
+            } else {
                 game.putAnswer(coordinate);
             }
             if (game.isWin(numberOfMines)) {

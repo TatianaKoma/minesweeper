@@ -1,18 +1,32 @@
 package ua.griddynamics;
 
 public class Cell {
-    boolean mine;
-    boolean checked;
-    boolean markedAsMine;
-    boolean markAsFree;
-    int neighborMines;
+    private boolean mine;
+    private boolean checked;
+    private boolean markedAsMine;
+    private int neighborMines;
 
     public Cell() {
         this.mine = false;
         this.checked = false;
         this.markedAsMine = false;
-        this.markAsFree = false;
         this.neighborMines = 0;
+    }
+
+    public void setMine(boolean mine) {
+        this.mine = mine;
+    }
+
+    public void setChecked(boolean checked) {
+        this.checked = checked;
+    }
+
+    public boolean isMarkedAsMine() {
+        return markedAsMine;
+    }
+
+    public void setMarkedAsMine(boolean markedAsMine) {
+        this.markedAsMine = markedAsMine;
     }
 
     public boolean isMine() {
