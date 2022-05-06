@@ -13,23 +13,22 @@ public class Main {
         CoordinateChecker coordinateChecker = new CoordinateChecker();
 
         boolean isMinesPlaced = false;
-        while (!game.isWin(numberOfMines)) {
+        while (!game.isWin()) {
             String[] userAnswer = coordinateChecker.scanAndCheckUserInput();
             Coordinate coordinate = coordinateChecker.getCoordinate(userAnswer, game);
             if (!isMinesPlaced) {
                 game.placeMines(coordinate);
             }
             isMinesPlaced = true;
-            game.putAnswer(coordinate);
+
             if (!game.putAnswer(coordinate)) {
                 game.showAllMines();
                 System.out.println(game.getField());
                 System.out.println("You stepped on a mine and failed!");
                 break;
-            } else {
-                game.putAnswer(coordinate);
             }
-            if (game.isWin(numberOfMines)) {
+
+            if (game.isWin()) {
                 System.out.println(game.getField());
                 System.out.println("Congratulations! You found all mines!");
                 break;

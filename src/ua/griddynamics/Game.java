@@ -30,14 +30,14 @@ public class Game {
         int minesPlaced = 0;
         int userX = coordinate.getX();
         int userY = coordinate.getY();
-        do {
+        while (minesPlaced < numberOfMines) {
             int x = random.nextInt(WIDTH);
             int y = random.nextInt(HEIGHT);
             if (!fields[y][x].isMine() && (x != userX || y != userY)) {
                 fields[y][x].setMine(true);
                 minesPlaced++;
             }
-        } while (minesPlaced < numberOfMines);
+        }
         numberGenerator();
     }
 
@@ -183,7 +183,7 @@ public class Game {
         }
     }
 
-    public boolean isWin(int numberOfMines) {
+    public boolean isWin() {
         int countMines = 0;
         int countPoints = 0;
         for (Cell[] field : fields) {
