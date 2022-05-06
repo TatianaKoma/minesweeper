@@ -27,7 +27,7 @@ public class CoordinateChecker {
     private boolean isCoordinateValid(String[] userInput) {
         int x = Integer.parseInt(userInput[1]) - 1;
         int y = Integer.parseInt(userInput[0]) - 1;
-        return x >= 0 && x < 9 && y >= 0 && y < 9;
+        return x >= 0 && x < Game.WIDTH && y >= 0 && y < Game.HEIGHT;
     }
 
     private static boolean isCoordinateDigit(String value) {
